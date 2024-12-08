@@ -1,0 +1,37 @@
+name: React Server Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Specify the version of Node.js you want to use
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run React development server in the background
+        run: |
+          nohup npm start &
+          sleep 10  # Wait a few seconds for the server to start
+
+      - name: Check if port 3000 is open
+        run: |
+          # Use netstat or ss to check if port 3000 is open
+          sudo apt-get install -y netcat
+          nc -zv localhost 3000 || exit 1  # Check if port 3000 is listening, exit with error if not
+        continue-on-error: false  # Fail the action if port 3000 is not open
